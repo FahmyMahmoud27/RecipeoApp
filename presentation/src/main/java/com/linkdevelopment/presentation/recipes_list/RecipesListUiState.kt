@@ -10,7 +10,9 @@ data class RecipesListUiState(
     val isLoading: Boolean = false,
     val recipes: List<Meal> = emptyList(),
     val error: String? = null,
-    val selectedTab: Int = 0
+    val selectedTab: Int = 0,
+    val selectedCategory: String = "All",
+    val categories: List<String> = emptyList()
 )
 
 
