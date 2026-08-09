@@ -24,4 +24,11 @@ class RecipeRepositoryImpl @Inject constructor(
             ?.map { it.toMeal() }
             ?: emptyList()
     }
+
+    override suspend fun getCategories(): List<String> {
+        return mealApiService.getCategories()
+            .categories
+            ?.mapNotNull { it.name }
+            ?: emptyList()
+    }
 }
