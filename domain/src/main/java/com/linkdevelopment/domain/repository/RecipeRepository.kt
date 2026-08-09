@@ -6,4 +6,7 @@ interface RecipeRepository {
 
     suspend fun getRecipesByCategory(category: String): List<Meal>
 
+    suspend fun searchRecipes(query: String): List<Meal>
+
+
 }
