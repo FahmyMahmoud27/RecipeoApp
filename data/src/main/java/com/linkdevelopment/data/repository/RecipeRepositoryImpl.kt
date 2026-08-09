@@ -17,4 +17,11 @@ class RecipeRepositoryImpl @Inject constructor(
             .orEmpty()
             .map { it.toMeal() }
     }
+
+    override suspend fun searchRecipes(query: String): List<Meal> {
+        return mealApiService.searchMeals(query)
+            .meals
+            ?.map { it.toMeal() }
+            ?: emptyList()
+    }
 }
