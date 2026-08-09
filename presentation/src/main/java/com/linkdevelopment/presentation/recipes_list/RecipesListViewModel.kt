@@ -4,7 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.linkdevelopment.domain.model.Meal
 import com.linkdevelopment.domain.usecase.GetRecipesByCategoryUseCase
+import com.linkdevelopment.domain.usecase.SearchRecipesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,11 +18,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RecipesListViewModel @Inject constructor(
-    private val getRecipesByCategoryUseCase: GetRecipesByCategoryUseCase
+    private val getRecipesByCategoryUseCase: GetRecipesByCategoryUseCase,
+    private val searchRecipesUseCase: SearchRecipesUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RecipesListUiState())
     val uiState: StateFlow<RecipesListUiState> = _uiState.asStateFlow()
+    private var searchJob: Job? = null
 
     init {
         getRecipes()
@@ -73,6 +78,50 @@ class RecipesListViewModel @Inject constructor(
             it.copy(
                 selectedTab = tab
             )
+        }
+    }
+
+    fun searchRecipes(query: String) {
+
+        _uiState.update {
+            it.copy(searchQuery = query)
+        }
+
+        searchJob?.cancel()
+
+        searchJob = viewModelScope.launch {
+            delay(500)
+
+            if (query.isBlank()) {
+                getRecipes()
+                return@launch
+            }
+
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                    error = null
+                )
+            }
+
+            try {
+                val recipes = searchRecipesUseCase(query)
+
+                _uiState.update {
+                    it.copy(
+                        recipes = recipes,
+                        isLoading = false,
+                        error = null
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = e.message
+                    )
+                }
+            }
         }
     }
 

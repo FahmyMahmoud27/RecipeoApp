@@ -5,6 +5,7 @@ import com.linkdevelopment.domain.model.Meal
 
 
 data class RecipesListUiState(
+    val searchQuery: String = "",
     val favoriteMealIds: Set<String> = emptySet(),
     val isLoading: Boolean = false,
     val recipes: List<Meal> = emptyList(),
