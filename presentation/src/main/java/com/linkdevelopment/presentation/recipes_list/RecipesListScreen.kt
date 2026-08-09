@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -117,16 +118,40 @@ fun RecipesListScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(categories) { category ->
+
+                // All
+                item {
                     FilterChip(
-                        selected = category == selectedCategory,
+                        selected = uiState.selectedCategory == "All",
                         onClick = {
-                            onCategorySelect(category)
+                            viewModel.selectCategory("All")
+                        },
+                        label = {
+                            Text(text = "All")
+                        },
+                        shape = RoundedCornerShape(20.dp),
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    )
+                }
+
+                // Categories
+                items(uiState.categories) { category ->
+                    FilterChip(
+                        selected = category == uiState.selectedCategory,
+                        onClick = {
+                            viewModel.selectCategory(category)
                         },
                         label = {
                             Text(text = category)
                         },
-                        shape = RoundedCornerShape(20.dp)
+                        shape = RoundedCornerShape(20.dp),
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                        )
                     )
                 }
             }
