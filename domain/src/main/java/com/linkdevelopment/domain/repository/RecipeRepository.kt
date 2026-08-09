@@ -8,5 +8,7 @@ interface RecipeRepository {
 
     suspend fun searchRecipes(query: String): List<Meal>
 
+    suspend fun getCategories(): List<String>
+
 
 }
