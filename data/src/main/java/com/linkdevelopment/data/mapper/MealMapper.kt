@@ -7,6 +7,8 @@ fun MealDto.toMeal(): Meal {
     return Meal(
         id = id.orEmpty(),
         name = name.orEmpty(),
-        imageUrl = thumbnail.orEmpty()
+        imageUrl = thumbnail.orEmpty(),
+        category = category.orEmpty(),
+        area = area.orEmpty()
     )
 }
