@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.linkdevelopment.domain.model.Meal
+import com.linkdevelopment.presentation.components.EmptyRecipesState
 import com.linkdevelopment.presentation.components.RecipeCard
 import com.linkdevelopment.presentation.components.RecipeoTextField
 import androidx.compose.foundation.lazy.grid.items as gridItems
@@ -39,8 +40,6 @@ import androidx.compose.foundation.lazy.grid.items as gridItems
 @Composable
 fun RecipesListScreen(
     viewModel: RecipesListViewModel = hiltViewModel(),
-    searchQuery: String,
-    onSearchQueryChange: (String) -> Unit,
     categories: List<String>,
     selectedCategory: String,
     onCategorySelect: (String) -> Unit,
@@ -93,8 +92,10 @@ fun RecipesListScreen(
 
             // Search
             RecipeoTextField(
-                value = searchQuery,
-                onValueChange = onSearchQueryChange,
+                value = uiState.searchQuery,
+                onValueChange = {
+                    viewModel.searchRecipes(it)
+                },
                 hint = "Search recipes",
                 leadingIcon = Icons.Default.Search,
                 modifier = Modifier.fillMaxWidth()
@@ -142,6 +143,11 @@ fun RecipesListScreen(
                     )
                 }
 
+                uiState.recipes.isEmpty() -> {
+                    EmptyRecipesState(
+                        modifier = Modifier.weight(1f)
+                    )
+                }
                 else -> {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
@@ -169,6 +175,7 @@ fun RecipesListScreen(
                         }
                     }
                 }
+
             }
         }
     }
