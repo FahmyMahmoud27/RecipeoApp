@@ -7,7 +7,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.linkdevelopment.presentation.navigation.AppNavigation
 import com.linkdevelopment.presentation.recipes_list.RecipesListScreen
+import com.linkdevelopment.presentation.ui.theme.RecipeoTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -21,14 +23,9 @@ class MainActivity : ComponentActivity() {
                 mutableStateOf<Set<String>>(emptySet())
             }
 
-            RecipesListScreen(
-                searchQuery = "",
-                onSearchQueryChange = {},
-                categories = emptyList(),
-                selectedCategory = "All",
-                onCategorySelect = {},
-                onMealClick = {},
-                )
+            RecipeoTheme {
+                AppNavigation()
+            }
         }
     }
 }
