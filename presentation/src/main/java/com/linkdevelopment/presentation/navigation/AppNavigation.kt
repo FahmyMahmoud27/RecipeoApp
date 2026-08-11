@@ -15,10 +15,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.linkdevelopment.presentation.signup.SignUpScreen
 import com.linkdevelopment.presentation.components.BottomBar
 import com.linkdevelopment.presentation.details.MealDetailsScreen
 import com.linkdevelopment.presentation.favorites.FavoritesScreen
+import com.linkdevelopment.presentation.login.SignInScreen
 import com.linkdevelopment.presentation.recipes_list.RecipesListScreen
+import com.linkdevelopment.presentation.splash.SplashScreen
 
 @Composable
 fun AppNavigation() {
@@ -29,7 +32,10 @@ fun AppNavigation() {
     val currentRoute = backStackEntry?.destination?.route
     val context = LocalContext.current
 
-    val showBottomBar = currentRoute != AppRoute.Details.route
+    val showBottomBar = currentRoute in listOf(
+        AppRoute.Home.route,
+        AppRoute.Favorites.route
+    )
 
     Scaffold(
         bottomBar = {
@@ -44,7 +50,7 @@ fun AppNavigation() {
 
         NavHost(
             navController = navController,
-            startDestination = AppRoute.Home.route,
+            startDestination = AppRoute.Splash.route,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
@@ -97,6 +103,54 @@ fun AppNavigation() {
                     )
                 }
             }
+
+
+            composable(AppRoute.Splash.route) {
+                SplashScreen(
+                    onNavigateToHome = {
+                        navController.navigate(AppRoute.Home.route) {
+                            popUpTo(AppRoute.Splash.route) {
+                                inclusive = true
+                            }
+                        }
+                    },
+                    onNavigateToLogin = {
+                        navController.navigate(AppRoute.Login.route) {
+                            popUpTo(AppRoute.Splash.route) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                )
+            }
+
+            composable(AppRoute.Login.route) {
+                SignInScreen(
+                    onLoginSuccess = {
+                        navController.navigate(AppRoute.Home.route) {
+                            popUpTo(AppRoute.Login.route) {
+                                inclusive = true
+                            }
+                        }
+                    },
+                    onSignUpClick = {
+                        navController.navigate(AppRoute.SignUp.route)
+                    }
+                )
+            }
+
+            composable(AppRoute.SignUp.route) {
+                SignUpScreen(
+                    onSignUpSuccess = {
+                        navController.navigate(AppRoute.Home.route) {
+                            popUpTo(AppRoute.Login.route) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                )
+            }
+
         }
     }
 }
@@ -104,14 +158,21 @@ fun AppNavigation() {
 sealed class AppRoute(
     val route: String
 ) {
+    data object Splash : AppRoute("splash")
+
+    data object Login : AppRoute("login")
+
+    data object SignUp : AppRoute("signup")
+
     data object Home : AppRoute("home")
+
     data object Favorites : AppRoute("favorites")
 
     data object Details : AppRoute("details/{mealId}") {
-
         fun createRoute(mealId: String): String {
             return "details/$mealId"
         }
     }
+
 
 }
