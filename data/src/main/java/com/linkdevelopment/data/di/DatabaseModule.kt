@@ -2,6 +2,7 @@ package com.linkdevelopment.data.di
 
 import android.content.Context
 import androidx.room.Room
+import com.linkdevelopment.data.local.dao.CachedMealsDao
 import com.linkdevelopment.data.local.dao.FavoriteMealsDao
 import com.linkdevelopment.data.local.database.AppDatabase
 import dagger.Module
@@ -24,7 +25,9 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "recipeo_database"
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides
@@ -32,5 +35,12 @@ object DatabaseModule {
         database: AppDatabase
     ): FavoriteMealsDao {
         return database.favoriteMealsDao()
+    }
+
+    @Provides
+    fun provideCachedMealsDao(
+        database: AppDatabase
+    ): CachedMealsDao {
+        return database.cachedMealsDao()
     }
 }

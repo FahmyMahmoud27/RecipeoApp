@@ -1,5 +1,7 @@
 package com.linkdevelopment.data.di
 
+import com.linkdevelopment.data.local.localdatasource.CachedMealsLocalDataSource
+import com.linkdevelopment.data.local.localdatasource.CachedMealsLocalDataSourceImpl
 import com.linkdevelopment.data.repository.RecipeRepositoryImpl
 import com.linkdevelopment.domain.repository.RecipeRepository
 import dagger.Binds
@@ -17,4 +19,10 @@ abstract class RepositoryModule {
     abstract fun bindRecipeRepository(
         repositoryImpl: RecipeRepositoryImpl
     ): RecipeRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindCachedMealsLocalDataSource(
+        localDataSourceImpl: CachedMealsLocalDataSourceImpl
+    ): CachedMealsLocalDataSource
 }

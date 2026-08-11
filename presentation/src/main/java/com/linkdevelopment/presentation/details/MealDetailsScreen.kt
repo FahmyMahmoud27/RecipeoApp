@@ -76,9 +76,21 @@ fun MealDetailsScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = uiState.error ?: "Something went wrong"
-                    )
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = uiState.error ?: "Something went wrong"
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        com.linkdevelopment.presentation.components.AppButton(
+                            text = "Retry",
+                            onClick = {
+                                viewModel.getMealDetails(mealId)
+                            }
+                        )
+                    }
                 }
             }
 

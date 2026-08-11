@@ -2,6 +2,7 @@ package com.linkdevelopment.presentation.details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.linkdevelopment.domain.model.AppError
 import com.linkdevelopment.domain.usecase.AddFavoriteUseCase
 import com.linkdevelopment.domain.usecase.GetFavoriteMealsUseCase
 import com.linkdevelopment.domain.usecase.GetMealDetailsUseCase
@@ -49,10 +50,16 @@ class MealDetailsViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) return@launch
+                val errorMessage = if (e is AppError) {
+                    e.getUserFriendlyMessage()
+                } else {
+                    "Something went wrong. Please try again."
+                }
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        error = e.message ?: "Something went wrong"
+                        error = errorMessage
                     )
                 }
             }

@@ -48,7 +48,7 @@ class FavoritesViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        error = e.message
+                        error = "Something went wrong while loading favorites."
                     )
                 }
             }
