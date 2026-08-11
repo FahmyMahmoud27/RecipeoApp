@@ -5,5 +5,7 @@ data class Meal(
     val name: String,
     val imageUrl: String,
     val category: String,
-    val area: String
+    val area: String,
+    val instructions: String,
+    val youtubeUrl: String
 )

@@ -9,6 +9,8 @@ fun MealDto.toMeal(): Meal {
         name = name.orEmpty(),
         imageUrl = thumbnail.orEmpty(),
         category = category.orEmpty(),
-        area = area.orEmpty()
+        area = area.orEmpty(),
+        instructions = instructions.orEmpty(),
+        youtubeUrl = youtubeUrl.orEmpty()
     )
 }

@@ -69,12 +69,23 @@ class RecipeRepositoryImpl @Inject constructor(
                         name = entity.name,
                         imageUrl = entity.imageUrl,
                         category = entity.category,
-                        area = entity.area
+                        area = entity.area,
+                        instructions = "",
+                        youtubeUrl = ""
                     )
                 }
             }
     }
 
+
+    override suspend fun getMealDetails(mealId: String): Meal {
+        return mealApiService
+            .getMealDetails(mealId)
+            .meals
+            ?.firstOrNull()
+            ?.toMeal()
+            ?: throw IllegalStateException("Meal not found")
+    }
 
 
 }
