@@ -9,6 +9,7 @@ import com.linkdevelopment.data.remote.api.MealApiService
 import com.linkdevelopment.domain.model.AppError
 import com.linkdevelopment.domain.model.Meal
 import com.linkdevelopment.domain.repository.RecipeRepository
+import com.linkdevelopment.domain.util.ICheckNetworkState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import retrofit2.HttpException
@@ -20,10 +21,20 @@ import javax.inject.Inject
 class RecipeRepositoryImpl @Inject constructor(
     private val mealApiService: MealApiService,
     private val favoriteMealsLocalDataSource: FavoriteMealsLocalDataSource,
-    private val cachedMealsLocalDataSource: CachedMealsLocalDataSource
+    private val cachedMealsLocalDataSource: CachedMealsLocalDataSource,
+    private val checkNetworkState: ICheckNetworkState
 ) : RecipeRepository {
 
     override suspend fun getRecipesByCategory(category: String): List<Meal> {
+        if (!checkNetworkState.isConnected()) {
+            val cachedMeals = cachedMealsLocalDataSource.getMealsByCategory(category)
+            return if (cachedMeals.isNotEmpty()) {
+                cachedMeals.map { it.toMeal() }
+            } else {
+                throw AppError.NoCacheAvailable
+            }
+        }
+
         return try {
             val response = mealApiService.filterMealsByCategory(category)
             val networkMeals = response.meals.orEmpty()
@@ -53,6 +64,15 @@ class RecipeRepositoryImpl @Inject constructor(
     }
 
     override suspend fun searchRecipes(query: String): List<Meal> {
+        if (!checkNetworkState.isConnected()) {
+            val cachedMeals = cachedMealsLocalDataSource.searchMeals(query)
+            return if (cachedMeals.isNotEmpty()) {
+                cachedMeals.map { it.toMeal() }
+            } else {
+                throw AppError.NoCacheAvailable
+            }
+        }
+
         return try {
             val response = mealApiService.searchMeals(query)
             val networkMeals = response.meals.orEmpty()
@@ -82,6 +102,15 @@ class RecipeRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getCategories(): List<String> {
+        if (!checkNetworkState.isConnected()) {
+            val cachedCategories = cachedMealsLocalDataSource.getAllCategories()
+            return if (cachedCategories.isNotEmpty()) {
+                cachedCategories
+            } else {
+                throw AppError.NoCacheAvailable
+            }
+        }
+
         return try {
             val categories = mealApiService.getCategories()
                 .categories
@@ -140,6 +169,11 @@ class RecipeRepositoryImpl @Inject constructor(
 
 
     override suspend fun getMealDetails(mealId: String): Meal {
+        if (!checkNetworkState.isConnected()) {
+            val cachedMeal = cachedMealsLocalDataSource.getMealById(mealId)
+            return cachedMeal?.toMeal() ?: throw AppError.NoCacheAvailable
+        }
+
         return try {
             val response = mealApiService.getMealDetails(mealId)
             val mealDto = response.meals?.firstOrNull() ?: throw IllegalStateException("Meal not found")
