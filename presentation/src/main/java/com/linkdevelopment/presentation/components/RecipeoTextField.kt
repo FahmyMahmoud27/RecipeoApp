@@ -29,11 +29,13 @@ fun RecipeoTextField(
     isFilled: Boolean = false,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    isError: Boolean = false
+    isError: Boolean = false,
+    enabled: Boolean = true
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
+        enabled = enabled,
         placeholder = {
             Text(
                 text = hint,
@@ -50,7 +52,10 @@ fun RecipeoTextField(
         },
         trailingIcon = if (trailingIcon != null) {
             {
-                IconButton(onClick = { onTrailingIconClick?.invoke() }) {
+                IconButton(
+                    onClick = { onTrailingIconClick?.invoke() },
+                    enabled = enabled
+                ) {
                     Icon(
                         imageVector = trailingIcon,
                         contentDescription = null,
@@ -75,8 +80,4 @@ fun RecipeoTextField(
             .fillMaxWidth()
             .height(56.dp)
     )
-
-
 }
-
-
