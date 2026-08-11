@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 
-
 @HiltViewModel
 class SignInViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository
@@ -22,7 +21,15 @@ class SignInViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(SignInUiState())
     val uiState: StateFlow<SignInUiState> = _uiState.asStateFlow()
 
-    fun updateEmailOrPhone(value: String) {
+    fun onEvent(event: SignInEvent) {
+        when (event) {
+            is SignInEvent.EmailOrPhoneChanged -> updateEmailOrPhone(event.value)
+            is SignInEvent.PasswordChanged -> updatePassword(event.value)
+            SignInEvent.LoginClicked -> login()
+        }
+    }
+
+    private fun updateEmailOrPhone(value: String) {
         _uiState.update {
             it.copy(
                 emailOrPhone = value,
@@ -31,7 +38,7 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    fun updatePassword(value: String) {
+    private fun updatePassword(value: String) {
         _uiState.update {
             it.copy(
                 password = value,
@@ -40,7 +47,7 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    fun login() {
+    private fun login() {
         val currentState = _uiState.value
 
         if (currentState.emailOrPhone.isBlank()) {
@@ -65,7 +72,6 @@ class SignInViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-
             _uiState.update {
                 it.copy(
                     isLoading = true,
@@ -86,3 +92,8 @@ class SignInViewModel @Inject constructor(
     }
 }
 
+sealed class SignInEvent {
+    data class EmailOrPhoneChanged(val value: String) : SignInEvent()
+    data class PasswordChanged(val value: String) : SignInEvent()
+    data object LoginClicked : SignInEvent()
+}

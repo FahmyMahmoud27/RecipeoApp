@@ -88,7 +88,7 @@ fun SignInScreen(
         // Email or Phone Field
         RecipeoTextField(
             value = uiState.emailOrPhone,
-            onValueChange = viewModel::updateEmailOrPhone,
+            onValueChange = { viewModel.onEvent(SignInEvent.EmailOrPhoneChanged(it)) },
             hint = "Email or phone number",
             leadingIcon = Icons.Outlined.Email,
             isError = uiState.error != null,
@@ -104,7 +104,7 @@ fun SignInScreen(
         // Password Field
         RecipeoTextField(
             value = uiState.password,
-            onValueChange = viewModel::updatePassword,
+            onValueChange = { viewModel.onEvent(SignInEvent.PasswordChanged(it)) },
             hint = "Password",
             leadingIcon = Icons.Outlined.Lock,
             isError = uiState.error != null,
@@ -145,7 +145,7 @@ fun SignInScreen(
             text = if (uiState.isLoading) "Logging in..." else "Login",
             enabled = !uiState.isLoading,
             onClick = {
-                viewModel.login()
+                viewModel.onEvent(SignInEvent.LoginClicked)
             }
         )
 

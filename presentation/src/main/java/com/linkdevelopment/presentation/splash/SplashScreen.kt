@@ -32,10 +32,6 @@ fun SplashScreen(
 ) {
 
     LaunchedEffect(Unit) {
-        viewModel.checkUserSession()
-    }
-
-    LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { event ->
             when (event) {
                 SplashNavigation.Home -> onNavigateToHome()

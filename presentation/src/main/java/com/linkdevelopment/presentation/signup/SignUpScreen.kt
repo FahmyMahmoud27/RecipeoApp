@@ -93,7 +93,7 @@ fun SignUpScreen(
             // Email or Phone Field
             RecipeoTextField(
                 value = uiState.emailOrPhone,
-                onValueChange = viewModel::updateEmailOrPhone,
+                onValueChange = { viewModel.onEvent(SignUpEvent.EmailOrPhoneChanged(it)) },
                 hint = "Email or phone number",
                 leadingIcon = Icons.Outlined.Email,
                 isError = uiState.error != null,
@@ -106,7 +106,7 @@ fun SignUpScreen(
             // Password Field
             RecipeoTextField(
                 value = uiState.password,
-                onValueChange = viewModel::updatePassword,
+                onValueChange = { viewModel.onEvent(SignUpEvent.PasswordChanged(it)) },
                 hint = "Password",
                 leadingIcon = Icons.Outlined.Lock,
                 isError = uiState.error != null,
@@ -150,7 +150,7 @@ fun SignUpScreen(
         AppButton(
             text = if (uiState.isLoading) "Creating account..." else "Sign Up",
             enabled = !uiState.isLoading,
-            onClick = viewModel::signUp,
+            onClick = { viewModel.onEvent(SignUpEvent.SignUpClicked) },
             modifier = Modifier.padding(bottom = 16.dp)
         )
     }

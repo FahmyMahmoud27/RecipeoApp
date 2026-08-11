@@ -21,7 +21,15 @@ class SignUpViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(SignUpUiState())
     val uiState: StateFlow<SignUpUiState> = _uiState.asStateFlow()
 
-    fun updateEmailOrPhone(value: String) {
+    fun onEvent(event: SignUpEvent) {
+        when (event) {
+            is SignUpEvent.EmailOrPhoneChanged -> updateEmailOrPhone(event.value)
+            is SignUpEvent.PasswordChanged -> updatePassword(event.value)
+            SignUpEvent.SignUpClicked -> signUp()
+        }
+    }
+
+    private fun updateEmailOrPhone(value: String) {
         _uiState.update {
             it.copy(
                 emailOrPhone = value,
@@ -30,7 +38,7 @@ class SignUpViewModel @Inject constructor(
         }
     }
 
-    fun updatePassword(value: String) {
+    private fun updatePassword(value: String) {
         val hasMinLength = value.length >= 6
         val hasNumber = value.any { it.isDigit() }
         _uiState.update {
@@ -43,7 +51,7 @@ class SignUpViewModel @Inject constructor(
         }
     }
 
-    fun signUp() {
+    private fun signUp() {
         val currentState = _uiState.value
 
         if (currentState.emailOrPhone.isBlank()) {
@@ -82,4 +90,10 @@ class SignUpViewModel @Inject constructor(
             }
         }
     }
+}
+
+sealed class SignUpEvent {
+    data class EmailOrPhoneChanged(val value: String) : SignUpEvent()
+    data class PasswordChanged(val value: String) : SignUpEvent()
+    data object SignUpClicked : SignUpEvent()
 }
