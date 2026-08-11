@@ -5,7 +5,9 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import com.linkdevelopment.data.local.entity.FavoriteMealEntity
+import com.linkdevelopment.data.local.entity.FavoriteMealWithCached
 import kotlinx.coroutines.flow.Flow
 
 
@@ -20,6 +22,10 @@ interface FavoriteMealsDao {
 
     @Query("SELECT * FROM favorite_meals")
     fun getFavorites(): Flow<List<FavoriteMealEntity>>
+
+    @Transaction
+    @Query("SELECT * FROM favorite_meals")
+    fun getFavoritesWithCached(): Flow<List<FavoriteMealWithCached>>
 }
 
 

@@ -1,6 +1,7 @@
 package com.linkdevelopment.data.repository
 
 import com.linkdevelopment.data.local.entity.FavoriteMealEntity
+import com.linkdevelopment.data.local.entity.FavoriteMealWithCached
 import com.linkdevelopment.data.local.localdatasource.CachedMealsLocalDataSource
 import com.linkdevelopment.data.local.localdatasource.FavoriteMealsLocalDataSource
 import com.linkdevelopment.data.mapper.toCachedEntity
@@ -151,17 +152,19 @@ class RecipeRepositoryImpl @Inject constructor(
 
     override fun getFavorites(): Flow<List<Meal>> {
         return favoriteMealsLocalDataSource
-            .getFavorites()
-            .map { meals ->
-                meals.map { entity ->
+            .getFavoritesWithCached()
+            .map { list ->
+                list.map { item ->
+                    val entity = item.favorite
+                    val cached = item.cached
                     Meal(
                         id = entity.id,
                         name = entity.name,
                         imageUrl = entity.imageUrl,
                         category = entity.category,
-                        area = entity.area,
-                        instructions = "",
-                        youtubeUrl = ""
+                        area = cached?.area ?: entity.area,
+                        instructions = cached?.instructions ?: "",
+                        youtubeUrl = cached?.youtubeUrl ?: ""
                     )
                 }
             }
