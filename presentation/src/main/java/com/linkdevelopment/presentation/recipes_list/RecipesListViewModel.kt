@@ -2,6 +2,7 @@ package com.linkdevelopment.presentation.recipes_list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.linkdevelopment.domain.model.AppError
 import com.linkdevelopment.domain.model.Meal
 import com.linkdevelopment.domain.usecase.AddFavoriteUseCase
 import com.linkdevelopment.domain.usecase.GetCategoriesUseCase
@@ -34,23 +35,53 @@ class RecipesListViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(RecipesListUiState())
     val uiState: StateFlow<RecipesListUiState> = _uiState.asStateFlow()
     private var searchJob: Job? = null
+    private var dataJob: Job? = null
 
     init {
-        getRecipes()
-        getCategories()
+        _uiState.update { it.copy(selectedCategory = "All") }
+        fetchData()
         observeFavorites()
     }
 
-    fun getRecipes() {
-        viewModelScope.launch {
-            _uiState.update {
-                it.copy(
-                    isLoading = true,
-                    error = null
-                )
+    fun onEvent(event: RecipesListEvent) {
+        when (event) {
+            is RecipesListEvent.SearchQueryChanged -> {
+                _uiState.update { it.copy(searchQuery = event.query) }
+                searchRecipes(event.query)
             }
+            is RecipesListEvent.CategorySelected -> {
+                _uiState.update { it.copy(selectedCategory = event.category) }
+                fetchData()
+            }
+            is RecipesListEvent.ToggleFavorite -> toggleFavorite(event.meal)
+            is RecipesListEvent.TabSelected -> selectTab(event.tab)
+            RecipesListEvent.Retry -> fetchData()
+        }
+    }
+
+    private fun fetchData() {
+        dataJob?.cancel()
+        dataJob = viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                val recipes = getRecipesByCategoryUseCase("Chicken")
+                // Load categories if missing
+                if (uiState.value.categories.isEmpty()) {
+                    try {
+                        val categories = getCategoriesUseCase()
+                        _uiState.update { it.copy(categories = categories) }
+                    } catch (e: Exception) {
+                        // Non-fatal if we already have some state or if getRecipes succeeds
+                        if (e is kotlinx.coroutines.CancellationException) throw e
+                    }
+                }
+
+                val currentCategory = uiState.value.selectedCategory
+                val recipes = if (currentCategory == "All") {
+                    getRecipesByCategoryUseCase("Chicken")
+                } else {
+                    getRecipesByCategoryUseCase(currentCategory)
+                }
+
                 _uiState.update {
                     it.copy(
                         recipes = recipes,
@@ -59,13 +90,24 @@ class RecipesListViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = e.message
-                    )
-                }
+                handleError(e)
             }
+        }
+    }
+
+    private fun handleError(e: Exception) {
+        if (e is kotlinx.coroutines.CancellationException) return
+        
+        val errorMessage = if (e is AppError) {
+            e.getUserFriendlyMessage()
+        } else {
+            "Something went wrong. Please try again."
+        }
+        _uiState.update {
+            it.copy(
+                isLoading = false,
+                error = errorMessage
+            )
         }
     }
 
@@ -81,7 +123,7 @@ class RecipesListViewModel @Inject constructor(
         }
     }
 
-    fun toggleFavorite(meal: Meal) {
+    private fun toggleFavorite(meal: Meal) {
         viewModelScope.launch {
             if (meal.id in uiState.value.favoriteMealIds) {
                 removeFavoriteUseCase(meal)
@@ -91,7 +133,7 @@ class RecipesListViewModel @Inject constructor(
         }
     }
 
-    fun selectTab(tab: Int) {
+    private fun selectTab(tab: Int) {
         _uiState.update {
             it.copy(
                 selectedTab = tab
@@ -99,25 +141,17 @@ class RecipesListViewModel @Inject constructor(
         }
     }
 
-    fun searchRecipes(query: String) {
-        _uiState.update {
-            it.copy(
-                searchQuery = query
-            )
-        }
+    private fun searchRecipes(query: String) {
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
             delay(500.milliseconds)
             if (query.isBlank()) {
-                getRecipes()
+                fetchData()
                 return@launch
             }
-            _uiState.update {
-                it.copy(
-                    isLoading = true,
-                    error = null
-                )
-            }
+            
+            dataJob?.cancel()
+            _uiState.update { it.copy(isLoading = true, error = null) }
             try {
                 val recipes = searchRecipesUseCase(query)
                 _uiState.update {
@@ -128,76 +162,8 @@ class RecipesListViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = e.message
-                    )
-                }
-            }
-        }
-    }
-
-
-    fun getCategories() {
-        viewModelScope.launch {
-            try {
-                val categories = getCategoriesUseCase()
-                _uiState.update {
-                    it.copy(
-                        categories = categories
-                    )
-                }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        error = e.message
-                    )
-                }
-            }
-        }
-    }
-
-    fun selectCategory(category: String) {
-        _uiState.update {
-            it.copy(
-                selectedCategory = category
-            )
-        }
-        if (category == "All") {
-            getRecipes()
-        } else {
-            getRecipesByCategory(category)
-        }
-    }
-
-    private fun getRecipesByCategory(category: String) {
-        viewModelScope.launch {
-            _uiState.update {
-                it.copy(
-                    isLoading = true,
-                    error = null
-                )
-            }
-            try {
-                val recipes = getRecipesByCategoryUseCase(category)
-                _uiState.update {
-                    it.copy(
-                        recipes = recipes,
-                        isLoading = false,
-                        error = null
-                    )
-                }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = e.message
-                    )
-                }
+                handleError(e)
             }
         }
     }
 }
-
-

@@ -54,7 +54,7 @@ fun RecipesListScreen(
         RecipeoTextField(
             value = uiState.searchQuery,
             onValueChange = {
-                viewModel.searchRecipes(it)
+                viewModel.onEvent(RecipesListEvent.SearchQueryChanged(it))
             },
             hint = "Search recipes",
             leadingIcon = Icons.Default.Search,
@@ -81,7 +81,7 @@ fun RecipesListScreen(
                 FilterChip(
                     selected = uiState.selectedCategory == "All",
                     onClick = {
-                        viewModel.selectCategory("All")
+                        viewModel.onEvent(RecipesListEvent.CategorySelected("All"))
                     },
                     label = {
                         Text(text = "All")
@@ -99,7 +99,7 @@ fun RecipesListScreen(
                 FilterChip(
                     selected = category == uiState.selectedCategory,
                     onClick = {
-                        viewModel.selectCategory(category)
+                        viewModel.onEvent(RecipesListEvent.CategorySelected(category))
                     },
                     label = {
                         Text(text = category)
@@ -129,26 +129,7 @@ fun RecipesListScreen(
                 }
             }
 
-            uiState.error != null -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = uiState.error ?: "Something went wrong"
-                    )
-                }
-            }
-
-            uiState.recipes.isEmpty() -> {
-                EmptyRecipesState(
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            else -> {
+            uiState.recipes.isNotEmpty() -> {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -167,7 +148,7 @@ fun RecipesListScreen(
                             meal = meal,
                             isFavorite = meal.id in uiState.favoriteMealIds,
                             onFavoriteClick = {
-                                viewModel.toggleFavorite(meal)
+                                viewModel.onEvent(RecipesListEvent.ToggleFavorite(meal))
                             },
                             onCardClick = {
                                 onMealClick(meal.id)
@@ -175,6 +156,37 @@ fun RecipesListScreen(
                         )
                     }
                 }
+            }
+
+            uiState.error != null -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = uiState.error ?: "Something went wrong"
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        com.linkdevelopment.presentation.components.AppButton(
+                            text = "Retry",
+                            onClick = {
+                                viewModel.onEvent(RecipesListEvent.Retry)
+                            }
+                        )
+                    }
+                }
+            }
+
+            uiState.recipes.isEmpty() -> {
+                EmptyRecipesState(
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
     }
