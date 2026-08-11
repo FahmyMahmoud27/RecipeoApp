@@ -18,5 +18,7 @@ interface RecipeRepository {
 
     fun getFavorites(): Flow<List<Meal>>
 
+    suspend fun getMealDetails(mealId: String): Meal
+
 
 }

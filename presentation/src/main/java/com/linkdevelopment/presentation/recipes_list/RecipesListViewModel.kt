@@ -71,16 +71,13 @@ class RecipesListViewModel @Inject constructor(
 
     private fun observeFavorites() {
         viewModelScope.launch {
-            getFavoriteMealsUseCase()
-                .collect { favorites ->
-                    _uiState.update {
-                        it.copy(
-                            favoriteMealIds = favorites
-                                .map { meal -> meal.id }
-                                .toSet()
-                        )
-                    }
+            getFavoriteMealsUseCase().collect { favorites ->
+                _uiState.update {
+                    it.copy(
+                        favoriteMealIds = favorites.map { meal -> meal.id }.toSet()
+                    )
                 }
+            }
         }
     }
 
