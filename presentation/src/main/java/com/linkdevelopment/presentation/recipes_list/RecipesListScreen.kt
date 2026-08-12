@@ -26,9 +26,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.linkdevelopment.presentation.R
 import com.linkdevelopment.presentation.components.EmptyRecipesState
 import com.linkdevelopment.presentation.components.RecipeCard
 import com.linkdevelopment.presentation.components.RecipeoTextField
@@ -41,6 +43,7 @@ fun RecipesListScreen(
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val allLabel = stringResource(R.string.category_all)
 
     Column(
         modifier = modifier
@@ -56,7 +59,7 @@ fun RecipesListScreen(
             onValueChange = {
                 viewModel.onEvent(RecipesListEvent.SearchQueryChanged(it))
             },
-            hint = "Search recipes",
+            hint = stringResource(R.string.hint_search_recipes),
             leadingIcon = Icons.Default.Search,
             modifier = Modifier.fillMaxWidth()
         )
@@ -65,7 +68,7 @@ fun RecipesListScreen(
 
         // Categories
         Text(
-            text = "Category",
+            text = stringResource(R.string.label_category),
             style = MaterialTheme.typography.titleMedium
         )
 
@@ -84,7 +87,7 @@ fun RecipesListScreen(
                         viewModel.onEvent(RecipesListEvent.CategorySelected("All"))
                     },
                     label = {
-                        Text(text = "All")
+                        Text(text = allLabel)
                     },
                     shape = RoundedCornerShape(20.dp),
                     colors = FilterChipDefaults.filterChipColors(
@@ -170,11 +173,11 @@ fun RecipesListScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = uiState.error ?: "Something went wrong"
+                            text = uiState.error ?: stringResource(R.string.error_something_went_wrong)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         com.linkdevelopment.presentation.components.AppButton(
-                            text = "Retry",
+                            text = stringResource(R.string.button_retry),
                             onClick = {
                                 viewModel.onEvent(RecipesListEvent.Retry)
                             }

@@ -15,9 +15,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.linkdevelopment.presentation.R
 import com.linkdevelopment.presentation.components.RecipeCard
 
 @Composable
@@ -40,14 +42,14 @@ fun FavoritesScreen(
 
             uiState.error != null -> {
                 Text(
-                    text = uiState.error ?: "Something went wrong",
+                    text = uiState.error ?: stringResource(R.string.error_something_went_wrong),
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
 
             uiState.favorites.isEmpty() -> {
                 Text(
-                    text = "No favorite recipes yet",
+                    text = stringResource(R.string.empty_favorites),
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
@@ -86,6 +88,3 @@ fun FavoritesScreen(
         }
     }
 }
-
-
-

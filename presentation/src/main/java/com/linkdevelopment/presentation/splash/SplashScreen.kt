@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -48,7 +49,7 @@ fun SplashScreen(
 
         Image(
             painter = painterResource(id = R.drawable.splash),
-            contentDescription = "Recipeo",
+            contentDescription = stringResource(R.string.splash_content_description),
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
@@ -65,7 +66,7 @@ fun SplashScreen(
                 .padding(bottom = 40.dp)
         ) {
             Text(
-                text = "Start Cooking",
+                text = stringResource(R.string.splash_title),
                 style = MaterialTheme.typography.headlineLarge.copy(
                     fontWeight = FontWeight.Bold,
                     fontSize = 24.sp
@@ -77,7 +78,7 @@ fun SplashScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Let's join our community\nto cook better food!",
+                text = stringResource(R.string.splash_subtitle),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

@@ -13,6 +13,9 @@ interface CachedMealsDao {
     @Query("SELECT * FROM cached_meals WHERE category = :category")
     suspend fun getMealsByCategory(category: String): List<CachedMealEntity>
 
+    @Query("SELECT * FROM cached_meals")
+    suspend fun getAllMeals(): List<CachedMealEntity>
+
     @Query("SELECT DISTINCT category FROM cached_meals WHERE category != ''")
     suspend fun getAllCategories(): List<String>
 

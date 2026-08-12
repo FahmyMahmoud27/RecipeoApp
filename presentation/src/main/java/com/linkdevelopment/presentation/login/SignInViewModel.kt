@@ -3,6 +3,8 @@ package com.linkdevelopment.presentation.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.linkdevelopment.domain.repository.UserPreferencesRepository
+import com.linkdevelopment.presentation.R
+import com.linkdevelopment.presentation.util.AuthValidator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +35,7 @@ class SignInViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 emailOrPhone = value,
-                error = null
+                errorResId = null
             )
         }
     }
@@ -42,7 +44,7 @@ class SignInViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 password = value,
-                error = null
+                errorResId = null
             )
         }
     }
@@ -52,21 +54,30 @@ class SignInViewModel @Inject constructor(
 
         if (currentState.emailOrPhone.isBlank()) {
             _uiState.update {
-                it.copy(error = "Please enter your email or phone number")
+                it.copy(errorResId = R.string.error_enter_email_or_phone)
+            }
+            return
+        }
+
+        if (!AuthValidator.isValidEmail(currentState.emailOrPhone) &&
+            !AuthValidator.isValidPhone(currentState.emailOrPhone)
+        ) {
+            _uiState.update {
+                it.copy(errorResId = R.string.error_invalid_email_or_phone)
             }
             return
         }
 
         if (currentState.password.isBlank()) {
             _uiState.update {
-                it.copy(error = "Please enter your password")
+                it.copy(errorResId = R.string.error_enter_password)
             }
             return
         }
 
         if (currentState.password.length < 6) {
             _uiState.update {
-                it.copy(error = "Password must be at least 6 characters")
+                it.copy(errorResId = R.string.error_password_min_length)
             }
             return
         }
@@ -75,7 +86,7 @@ class SignInViewModel @Inject constructor(
             _uiState.update {
                 it.copy(
                     isLoading = true,
-                    error = null
+                    errorResId = null
                 )
             }
             delay(1000.milliseconds)
@@ -85,7 +96,7 @@ class SignInViewModel @Inject constructor(
                 it.copy(
                     isLoading = false,
                     isLoginSuccessful = true,
-                    error = null
+                    errorResId = null
                 )
             }
         }

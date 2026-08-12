@@ -1,5 +1,6 @@
 package com.linkdevelopment.data.repository
 
+import com.linkdevelopment.data.local.entity.CachedMealEntity
 import com.linkdevelopment.data.local.entity.FavoriteMealEntity
 import com.linkdevelopment.data.local.entity.FavoriteMealWithCached
 import com.linkdevelopment.data.local.localdatasource.CachedMealsLocalDataSource
@@ -7,6 +8,7 @@ import com.linkdevelopment.data.local.localdatasource.FavoriteMealsLocalDataSour
 import com.linkdevelopment.data.mapper.toCachedEntity
 import com.linkdevelopment.data.mapper.toMeal
 import com.linkdevelopment.data.remote.api.MealApiService
+import com.linkdevelopment.data.remote.dto.MealDto
 import com.linkdevelopment.domain.model.AppError
 import com.linkdevelopment.domain.model.Meal
 import com.linkdevelopment.domain.repository.RecipeRepository
@@ -27,105 +29,45 @@ class RecipeRepositoryImpl @Inject constructor(
 ) : RecipeRepository {
 
     override suspend fun getRecipesByCategory(category: String): List<Meal> {
-        if (!checkNetworkState.isConnected()) {
-            val cachedMeals = cachedMealsLocalDataSource.getMealsByCategory(category)
-            return if (cachedMeals.isNotEmpty()) {
-                cachedMeals.map { it.toMeal() }
-            } else {
-                throw AppError.NoCacheAvailable
-            }
-        }
-
-        return try {
-            val response = mealApiService.filterMealsByCategory(category)
-            val networkMeals = response.meals.orEmpty()
-            
-            val existingCached = cachedMealsLocalDataSource.getMealsByIds(networkMeals.mapNotNull { it.id })
-            val mergedEntities = networkMeals.map { dto ->
-                val cached = existingCached.find { it.id == dto.id }
-                dto.toCachedEntity(category).copy(
-                    instructions = if (dto.instructions.isNullOrBlank()) cached?.instructions.orEmpty() else dto.instructions.orEmpty(),
-                    area = if (dto.area.isNullOrBlank()) cached?.area.orEmpty() else dto.area.orEmpty(),
-                    youtubeUrl = if (dto.youtubeUrl.isNullOrBlank()) cached?.youtubeUrl.orEmpty() else dto.youtubeUrl.orEmpty()
-                )
-            }
-
-            cachedMealsLocalDataSource.deleteMealsByCategory(category)
-            cachedMealsLocalDataSource.saveMeals(mergedEntities)
-
-            mergedEntities.map { it.toMeal() }
-        } catch (e: Exception) {
-            val cachedMeals = cachedMealsLocalDataSource.getMealsByCategory(category)
-            if (cachedMeals.isNotEmpty()) {
-                cachedMeals.map { it.toMeal() }
-            } else {
-                throw mapToAppError(e, true)
-            }
-        }
+        val isAll = category == "All"
+        return executeWithCacheFallback(
+            networkAction = {
+                val response = if (isAll) mealApiService.searchMeals("") else mealApiService.filterMealsByCategory(category)
+                val networkMeals = response.meals.orEmpty()
+                val merged = mergeWithCache(networkMeals, if (isAll) null else category)
+                if (!isAll) cachedMealsLocalDataSource.deleteMealsByCategory(category)
+                cachedMealsLocalDataSource.saveMeals(merged)
+                merged.map { it.toMeal() }
+            },
+            localAction = {
+                val cached = if (isAll) cachedMealsLocalDataSource.getAllMeals() else cachedMealsLocalDataSource.getMealsByCategory(category)
+                cached.map { it.toMeal() }
+            },
+            isCacheEmpty = { it.isNullOrEmpty() }
+        )
     }
 
     override suspend fun searchRecipes(query: String): List<Meal> {
-        if (!checkNetworkState.isConnected()) {
-            val cachedMeals = cachedMealsLocalDataSource.searchMeals(query)
-            return if (cachedMeals.isNotEmpty()) {
-                cachedMeals.map { it.toMeal() }
-            } else {
-                throw AppError.NoCacheAvailable
-            }
-        }
-
-        return try {
-            val response = mealApiService.searchMeals(query)
-            val networkMeals = response.meals.orEmpty()
-
-            // Safe Cache Update: Prevent partial data from overwriting full details
-            val existingCached = cachedMealsLocalDataSource.getMealsByIds(networkMeals.mapNotNull { it.id })
-            val mergedEntities = networkMeals.map { dto ->
-                val cached = existingCached.find { it.id == dto.id }
-                dto.toCachedEntity().copy(
-                    instructions = if (dto.instructions.isNullOrBlank()) cached?.instructions.orEmpty() else dto.instructions.orEmpty(),
-                    area = if (dto.area.isNullOrBlank()) cached?.area.orEmpty() else dto.area.orEmpty(),
-                    youtubeUrl = if (dto.youtubeUrl.isNullOrBlank()) cached?.youtubeUrl.orEmpty() else dto.youtubeUrl.orEmpty()
-                )
-            }
-
-            cachedMealsLocalDataSource.saveMeals(mergedEntities)
-
-            mergedEntities.map { it.toMeal() }
-        } catch (e: Exception) {
-            val cachedMeals = cachedMealsLocalDataSource.searchMeals(query)
-            if (cachedMeals.isNotEmpty()) {
-                cachedMeals.map { it.toMeal() }
-            } else {
-                throw mapToAppError(e, true)
-            }
-        }
+        return executeWithCacheFallback(
+            networkAction = {
+                val response = mealApiService.searchMeals(query)
+                val merged = mergeWithCache(response.meals.orEmpty(), null)
+                cachedMealsLocalDataSource.saveMeals(merged)
+                merged.map { it.toMeal() }
+            },
+            localAction = { cachedMealsLocalDataSource.searchMeals(query).map { it.toMeal() } },
+            isCacheEmpty = { it.isNullOrEmpty() }
+        )
     }
 
     override suspend fun getCategories(): List<String> {
-        if (!checkNetworkState.isConnected()) {
-            val cachedCategories = cachedMealsLocalDataSource.getAllCategories()
-            return if (cachedCategories.isNotEmpty()) {
-                cachedCategories
-            } else {
-                throw AppError.NoCacheAvailable
-            }
-        }
-
-        return try {
-            val categories = mealApiService.getCategories()
-                .categories
-                ?.mapNotNull { it.name }
-                ?: emptyList()
-            categories
-        } catch (e: Exception) {
-            val cachedCategories = cachedMealsLocalDataSource.getAllCategories()
-            if (cachedCategories.isNotEmpty()) {
-                cachedCategories
-            } else {
-                throw mapToAppError(e, true)
-            }
-        }
+        return executeWithCacheFallback(
+            networkAction = {
+                mealApiService.getCategories().categories?.mapNotNull { it.name } ?: emptyList()
+            },
+            localAction = { cachedMealsLocalDataSource.getAllCategories() },
+            isCacheEmpty = { it.isNullOrEmpty() }
+        )
     }
 
     private fun Meal.toFavoriteEntity(): FavoriteMealEntity {
@@ -170,22 +112,49 @@ class RecipeRepositoryImpl @Inject constructor(
             }
     }
 
-
     override suspend fun getMealDetails(mealId: String): Meal {
+        return executeWithCacheFallback(
+            networkAction = {
+                val response = mealApiService.getMealDetails(mealId)
+                val mealDto = response.meals?.firstOrNull() ?: throw IllegalStateException("Meal not found")
+                cachedMealsLocalDataSource.saveMeals(listOf(mealDto.toCachedEntity()))
+                mealDto.toMeal()
+            },
+            localAction = { cachedMealsLocalDataSource.getMealById(mealId)?.toMeal() },
+            isCacheEmpty = { it == null }
+        )
+    }
+
+    private suspend fun <T> executeWithCacheFallback(
+        networkAction: suspend () -> T,
+        localAction: suspend () -> T?,
+        isCacheEmpty: (T?) -> Boolean
+    ): T {
         if (!checkNetworkState.isConnected()) {
-            val cachedMeal = cachedMealsLocalDataSource.getMealById(mealId)
-            return cachedMeal?.toMeal() ?: throw AppError.NoCacheAvailable
+            val cache = localAction()
+            if (isCacheEmpty(cache)) throw AppError.NoCacheAvailable
+            return cache!!
         }
 
         return try {
-            val response = mealApiService.getMealDetails(mealId)
-            val mealDto = response.meals?.firstOrNull() ?: throw IllegalStateException("Meal not found")
-            val meal = mealDto.toMeal()
-            cachedMealsLocalDataSource.saveMeals(listOf(mealDto.toCachedEntity()))
-            meal
+            networkAction()
         } catch (e: Exception) {
-            val cachedMeal = cachedMealsLocalDataSource.getMealById(mealId)
-            cachedMeal?.toMeal() ?: throw mapToAppError(e, true)
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            val cache = localAction()
+            if (isCacheEmpty(cache)) throw mapToAppError(e, true)
+            cache!!
+        }
+    }
+
+    private suspend fun mergeWithCache(networkMeals: List<MealDto>, category: String?): List<CachedMealEntity> {
+        val existingCached = cachedMealsLocalDataSource.getMealsByIds(networkMeals.mapNotNull { it.id })
+        return networkMeals.map { dto ->
+            val cached = existingCached.find { it.id == dto.id }
+            dto.toCachedEntity(category).copy(
+                instructions = if (dto.instructions.isNullOrBlank()) cached?.instructions.orEmpty() else dto.instructions.orEmpty(),
+                area = if (dto.area.isNullOrBlank()) cached?.area.orEmpty() else dto.area.orEmpty(),
+                youtubeUrl = if (dto.youtubeUrl.isNullOrBlank()) cached?.youtubeUrl.orEmpty() else dto.youtubeUrl.orEmpty()
+            )
         }
     }
 

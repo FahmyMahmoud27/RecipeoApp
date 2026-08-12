@@ -36,11 +36,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.linkdevelopment.presentation.R
 
 @Composable
 fun MealDetailsScreen(
@@ -81,11 +83,11 @@ fun MealDetailsScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = uiState.error ?: "Something went wrong"
+                            text = uiState.error ?: stringResource(R.string.error_something_went_wrong)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         com.linkdevelopment.presentation.components.AppButton(
-                            text = "Retry",
+                            text = stringResource(R.string.button_retry),
                             onClick = {
                                 viewModel.getMealDetails(mealId)
                             }
@@ -129,7 +131,7 @@ fun MealDetailsScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.cd_back),
                             tint = Color.White
                         )
                     }
@@ -151,7 +153,7 @@ fun MealDetailsScreen(
                             } else {
                                 Icons.Default.FavoriteBorder
                             },
-                            contentDescription = "Favorite",
+                            contentDescription = stringResource(R.string.cd_favorite),
                             tint = if (uiState.isFavorite) {
                                 Color.Red
                             } else {
@@ -201,7 +203,7 @@ fun MealDetailsScreen(
                                 color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                             )
                             Text(
-                                text = "Instructions",
+                                text = stringResource(R.string.label_instructions),
                                 style = MaterialTheme.typography.titleLarge,
                                 color = Color.Black
                             )
@@ -222,7 +224,7 @@ fun MealDetailsScreen(
                                     shape = RoundedCornerShape(25.dp)
                                 ) {
                                     Text(
-                                        text = "Watch on YouTube",
+                                        text = stringResource(R.string.button_watch_youtube),
                                         style = MaterialTheme.typography.titleMedium
                                     )
                                 }

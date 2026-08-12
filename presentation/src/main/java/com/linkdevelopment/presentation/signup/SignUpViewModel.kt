@@ -3,6 +3,8 @@ package com.linkdevelopment.presentation.signup
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.linkdevelopment.domain.repository.UserPreferencesRepository
+import com.linkdevelopment.presentation.R
+import com.linkdevelopment.presentation.util.AuthValidator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +35,7 @@ class SignUpViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 emailOrPhone = value,
-                error = null
+                errorResId = null
             )
         }
     }
@@ -44,7 +46,7 @@ class SignUpViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 password = value,
-                error = null,
+                errorResId = null,
                 hasMinLength = hasMinLength,
                 hasNumber = hasNumber
             )
@@ -55,27 +57,34 @@ class SignUpViewModel @Inject constructor(
         val currentState = _uiState.value
 
         if (currentState.emailOrPhone.isBlank()) {
-            _uiState.update { it.copy(error = "Please enter your email or phone number") }
+            _uiState.update { it.copy(errorResId = R.string.error_enter_email_or_phone) }
+            return
+        }
+
+        if (!AuthValidator.isValidEmail(currentState.emailOrPhone) &&
+            !AuthValidator.isValidPhone(currentState.emailOrPhone)
+        ) {
+            _uiState.update { it.copy(errorResId = R.string.error_invalid_email_or_phone) }
             return
         }
 
         if (currentState.password.isBlank()) {
-            _uiState.update { it.copy(error = "Please enter your password") }
+            _uiState.update { it.copy(errorResId = R.string.error_enter_password) }
             return
         }
 
         if (!currentState.hasMinLength) {
-            _uiState.update { it.copy(error = "Password must be at least 6 characters") }
+            _uiState.update { it.copy(errorResId = R.string.error_password_min_length) }
             return
         }
 
         if (!currentState.hasNumber) {
-            _uiState.update { it.copy(error = "Password must contain at least one number") }
+            _uiState.update { it.copy(errorResId = R.string.error_password_must_contain_number) }
             return
         }
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            _uiState.update { it.copy(isLoading = true, errorResId = null) }
             
             // Simulate registration
             delay(1500.milliseconds)

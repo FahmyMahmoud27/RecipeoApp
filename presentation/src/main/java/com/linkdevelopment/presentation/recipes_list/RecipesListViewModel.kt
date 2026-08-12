@@ -50,7 +50,12 @@ class RecipesListViewModel @Inject constructor(
                 searchRecipes(event.query)
             }
             is RecipesListEvent.CategorySelected -> {
-                _uiState.update { it.copy(selectedCategory = event.category) }
+                _uiState.update { 
+                    it.copy(
+                        selectedCategory = event.category,
+                        searchQuery = ""
+                    ) 
+                }
                 fetchData()
             }
             is RecipesListEvent.ToggleFavorite -> toggleFavorite(event.meal)
@@ -60,6 +65,7 @@ class RecipesListViewModel @Inject constructor(
     }
 
     private fun fetchData() {
+        searchJob?.cancel()
         dataJob?.cancel()
         dataJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
@@ -76,11 +82,7 @@ class RecipesListViewModel @Inject constructor(
                 }
 
                 val currentCategory = uiState.value.selectedCategory
-                val recipes = if (currentCategory == "All") {
-                    getRecipesByCategoryUseCase("Chicken")
-                } else {
-                    getRecipesByCategoryUseCase(currentCategory)
-                }
+                val recipes = getRecipesByCategoryUseCase(currentCategory)
 
                 _uiState.update {
                     it.copy(

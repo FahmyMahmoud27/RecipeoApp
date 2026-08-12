@@ -12,6 +12,10 @@ class CachedMealsLocalDataSourceImpl @Inject constructor(
         return cachedMealsDao.getMealsByCategory(category)
     }
 
+    override suspend fun getAllMeals(): List<CachedMealEntity> {
+        return cachedMealsDao.getAllMeals()
+    }
+
     override suspend fun getMealsByIds(ids: List<String>): List<CachedMealEntity> {
         return cachedMealsDao.getMealsByIds(ids)
     }

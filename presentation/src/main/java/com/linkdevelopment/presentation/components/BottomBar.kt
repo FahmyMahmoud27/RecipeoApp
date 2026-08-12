@@ -10,7 +10,9 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
+import com.linkdevelopment.presentation.R
 import com.linkdevelopment.presentation.navigation.AppRoute
 
 @Composable
@@ -42,11 +44,11 @@ fun BottomBar(
             icon = {
                 Icon(
                     imageVector = Icons.Default.Home,
-                    contentDescription = "Home"
+                    contentDescription = stringResource(R.string.bottom_bar_home)
                 )
             },
             label = {
-                Text("Home")
+                Text(stringResource(R.string.bottom_bar_home))
             }
         )
         NavigationBarItem(
@@ -63,13 +65,12 @@ fun BottomBar(
             icon = {
                 Icon(
                     imageVector = Icons.Default.Favorite,
-                    contentDescription = "Favorites"
+                    contentDescription = stringResource(R.string.bottom_bar_favorites)
                 )
             },
             label = {
-                Text("Favorites")
+                Text(stringResource(R.string.bottom_bar_favorites))
             }
         )
     }
 }
-

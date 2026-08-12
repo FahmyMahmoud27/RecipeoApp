@@ -8,6 +8,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.linkdevelopment.presentation.R
 
 @Composable
 fun EmptyRecipesState(
@@ -19,9 +21,8 @@ fun EmptyRecipesState(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "No recipes found",
+            text = stringResource(R.string.empty_recipes),
             style = MaterialTheme.typography.titleMedium
         )
     }
 }
-
