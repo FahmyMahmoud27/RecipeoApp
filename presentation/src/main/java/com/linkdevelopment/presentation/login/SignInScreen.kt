@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -35,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.linkdevelopment.presentation.R
 import com.linkdevelopment.presentation.components.AppButton
 import com.linkdevelopment.presentation.components.RecipeoTextField
 
@@ -66,7 +68,7 @@ fun SignInScreen(
 
         // --- 1. Header (Welcome Back) ---
         Text(
-            text = "Welcome Back!",
+            text = stringResource(R.string.sign_in_welcome),
             style = MaterialTheme.typography.headlineMedium.copy(
                 fontWeight = FontWeight.Bold,
                 fontSize = 24.sp
@@ -77,7 +79,7 @@ fun SignInScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Please enter your account here",
+            text = stringResource(R.string.sign_in_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -89,9 +91,9 @@ fun SignInScreen(
         RecipeoTextField(
             value = uiState.emailOrPhone,
             onValueChange = { viewModel.onEvent(SignInEvent.EmailOrPhoneChanged(it)) },
-            hint = "Email or phone number",
+            hint = stringResource(R.string.hint_email_or_phone),
             leadingIcon = Icons.Outlined.Email,
-            isError = uiState.error != null,
+            isError = uiState.errorResId != null,
             enabled = !uiState.isLoading,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email
@@ -105,9 +107,9 @@ fun SignInScreen(
         RecipeoTextField(
             value = uiState.password,
             onValueChange = { viewModel.onEvent(SignInEvent.PasswordChanged(it)) },
-            hint = "Password",
+            hint = stringResource(R.string.hint_password),
             leadingIcon = Icons.Outlined.Lock,
-            isError = uiState.error != null,
+            isError = uiState.errorResId != null,
             enabled = !uiState.isLoading,
             trailingIcon = if (isPasswordVisible) {
                 Icons.Outlined.Visibility
@@ -127,9 +129,9 @@ fun SignInScreen(
             )
         )
 
-        uiState.error?.let { error ->
+        uiState.errorResId?.let { errorResId ->
             Text(
-                text = error,
+                text = stringResource(errorResId),
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
@@ -142,7 +144,7 @@ fun SignInScreen(
 
         // --- 3. Login Button ---
         AppButton(
-            text = if (uiState.isLoading) "Logging in..." else "Login",
+            text = if (uiState.isLoading) stringResource(R.string.button_logging_in) else stringResource(R.string.button_login),
             enabled = !uiState.isLoading,
             onClick = {
                 viewModel.onEvent(SignInEvent.LoginClicked)
@@ -157,13 +159,13 @@ fun SignInScreen(
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Don’t have any account? ",
+                text = stringResource(R.string.sign_in_no_account),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Text(
-                text = "Sign Up",
+                text = stringResource(R.string.sign_in_sign_up_link),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.Bold
                 ),

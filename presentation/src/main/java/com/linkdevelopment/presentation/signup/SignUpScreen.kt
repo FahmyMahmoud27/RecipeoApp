@@ -30,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.linkdevelopment.presentation.R
 import com.linkdevelopment.presentation.components.AppButton
 import com.linkdevelopment.presentation.components.RecipeoTextField
 
@@ -71,7 +73,7 @@ fun SignUpScreen(
             modifier = Modifier.padding(top = 40.dp)
         ) {
             Text(
-                text = "Welcome!",
+                text = stringResource(R.string.sign_up_welcome),
                 style = MaterialTheme.typography.headlineMedium.copy(
                     fontWeight = FontWeight.Bold,
                     fontSize = 24.sp
@@ -82,7 +84,7 @@ fun SignUpScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Please enter your account here",
+                text = stringResource(R.string.sign_in_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -94,9 +96,9 @@ fun SignUpScreen(
             RecipeoTextField(
                 value = uiState.emailOrPhone,
                 onValueChange = { viewModel.onEvent(SignUpEvent.EmailOrPhoneChanged(it)) },
-                hint = "Email or phone number",
+                hint = stringResource(R.string.hint_email_or_phone),
                 leadingIcon = Icons.Outlined.Email,
-                isError = uiState.error != null,
+                isError = uiState.errorResId != null,
                 enabled = !uiState.isLoading,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
             )
@@ -107,9 +109,9 @@ fun SignUpScreen(
             RecipeoTextField(
                 value = uiState.password,
                 onValueChange = { viewModel.onEvent(SignUpEvent.PasswordChanged(it)) },
-                hint = "Password",
+                hint = stringResource(R.string.hint_password),
                 leadingIcon = Icons.Outlined.Lock,
-                isError = uiState.error != null,
+                isError = uiState.errorResId != null,
                 enabled = !uiState.isLoading,
                 trailingIcon = if (isPasswordVisible) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff,
                 onTrailingIconClick = { isPasswordVisible = !isPasswordVisible },
@@ -125,18 +127,18 @@ fun SignUpScreen(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 RequirementItem(
-                    text = "At least 6 characters",
+                    text = stringResource(R.string.requirement_min_length),
                     isMet = uiState.hasMinLength
                 )
                 RequirementItem(
-                    text = "Contains at least one number",
+                    text = stringResource(R.string.requirement_has_number),
                     isMet = uiState.hasNumber
                 )
             }
 
-            if (uiState.error != null) {
+            if (uiState.errorResId != null) {
                 Text(
-                    text = uiState.error ?: "",
+                    text = stringResource(uiState.errorResId!!),
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier
@@ -148,7 +150,7 @@ fun SignUpScreen(
 
         // --- 3. Sign Up Button ---
         AppButton(
-            text = if (uiState.isLoading) "Creating account..." else "Sign Up",
+            text = if (uiState.isLoading) stringResource(R.string.button_creating_account) else stringResource(R.string.button_sign_up),
             enabled = !uiState.isLoading,
             onClick = { viewModel.onEvent(SignUpEvent.SignUpClicked) },
             modifier = Modifier.padding(bottom = 16.dp)
