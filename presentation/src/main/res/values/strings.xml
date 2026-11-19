@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Splash Screen -->
+    <string name="splash_content_description">Recipeo</string>
+    <string name="splash_title">Start Cooking</string>
+    <string name="splash_subtitle">Let\'s join our community\nto cook better food!</string>
+
+    <!-- Sign In Screen -->
+    <string name="sign_in_welcome">Welcome Back!</string>
+    <string name="sign_in_subtitle">Please enter your account here</string>
+    <string name="hint_email_or_phone">Email or phone number</string>
+    <string name="hint_password">Password</string>
+    <string name="button_logging_in">Logging in…</string>
+    <string name="button_login">Login</string>
+    <string name="sign_in_no_account">Don\'t have any account? </string>
+    <string name="sign_in_sign_up_link">Sign Up</string>
+
+    <!-- Sign Up Screen -->
+    <string name="sign_up_welcome">Welcome!</string>
+    <string name="button_creating_account">Creating account…</string>
+    <string name="button_sign_up">Sign Up</string>
+    <string name="requirement_min_length">At least 6 characters</string>
+    <string name="requirement_has_number">Contains at least one number</string>
+
+    <!-- Recipes List Screen -->
+    <string name="hint_search_recipes">Search recipes</string>
+    <string name="label_category">Category</string>
+    <string name="category_all">All</string>
+
+    <!-- Meal Details Screen -->
+    <string name="cd_back">Back</string>
+    <string name="cd_favorite">Favorite</string>
+    <string name="label_instructions">Instructions</string>
+    <string name="button_watch_youtube">Watch on YouTube</string>
+
+    <!-- Bottom Bar -->
+    <string name="bottom_bar_home">Home</string>
+    <string name="bottom_bar_favorites">Favorites</string>
+
+    <!-- Empty / Error States -->
+    <string name="empty_recipes">No recipes found</string>
+    <string name="empty_favorites">No favorite recipes yet</string>
+    <string name="error_something_went_wrong">Something went wrong</string>
+    <string name="button_retry">Retry</string>
+
+    <!-- Validation Messages (SignIn / SignUp ViewModels) -->
+    <string name="error_enter_email_or_phone">Please enter your email or phone number</string>
+    <string name="error_invalid_email_or_phone">Please enter a valid email or phone number</string>
+    <string name="error_enter_password">Please enter your password</string>
+    <string name="error_password_min_length">Password must be at least 6 characters</string>
+    <string name="error_password_must_contain_number">Password must contain at least one number</string>
+
+    <!-- Generic ViewModel Error Fallback -->
+    <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="error_loading_favorites">Something went wrong while loading favorites.</string>
+</resources>
